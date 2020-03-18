@@ -8,36 +8,8 @@
     <fragment
         xmlns:map="http://schemas.android.com/apk/res-auto"
         android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:name="com.example.haolun.madisonbus.ui.MyMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MainActivity"/>
-
-    <!--
-    <fragment
-        android:id="@+id/nav_home"
-        android:name="com.example.haolun.madisonbus.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home">
-    </fragment>
-    <fragment
-        android:id="@+id/nav_home_second"
-        android:name="com.example.haolun.madisonbus.ui.home.HomeSecondFragment"
-        android:label="@string/home_second"
-        tools:layout="@layout/fragment_home_second">
-    </fragment>
-
-    <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.example.haolun.madisonbus.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
-
-    <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.example.haolun.madisonbus.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
-
-    -->
 </navigation>

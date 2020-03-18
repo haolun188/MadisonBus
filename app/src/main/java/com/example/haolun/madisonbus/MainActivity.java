@@ -26,13 +26,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity{
     private final String TAG = "MainActivity";
 
     private AppBarConfiguration mAppBarConfiguration;
     private Menu mMenu;
     private Info info;
-    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,18 +48,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
+
         mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.map)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-
-        navController.navigate(R.id.map);
-        NavHostFragment navHostFragment = (NavHostFragment)getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-        Log.d(TAG, String.valueOf(navHostFragment.getChildFragmentManager().getFragments().size()));
-        SupportMapFragment mapFragment = (SupportMapFragment) navHostFragment.getChildFragmentManager().getFragments().get(0);
-        mapFragment.getMapAsync(this);
     }
 
     private void initDrawerMenu() {
@@ -81,16 +75,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        Log.d(TAG, "HERE");
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 }
