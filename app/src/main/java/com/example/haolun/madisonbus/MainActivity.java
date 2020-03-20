@@ -3,30 +3,24 @@ package com.example.haolun.madisonbus;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Menu;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
-import androidx.fragment.app.FragmentActivity;
+import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     private final String TAG = "MainActivity";
 
     private AppBarConfiguration mAppBarConfiguration;
@@ -34,6 +28,7 @@ public class MainActivity extends AppCompatActivity{
     private Menu mMenu;
     private Info info;
     private DrawerLayout mDrawer;
+    private MapPlotter mMapPlotter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +36,7 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         info = new Info(getResources().openRawResource(R.raw.stops), getResources().openRawResource(R.raw.routes));
+        mMapPlotter = new MapPlotter();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -83,5 +79,26 @@ public class MainActivity extends AppCompatActivity{
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        //TODO: plot routes
+        String routeName = item.getTitle().toString();
+        List<List<LatLng>> pointsList = info.getRoutesByName(routeName);
+        String colorRgb = info.getColorByName(routeName);
+        Log.d(TAG, colorRgb);
+
+        mMapPlotter.removeRouteFromMap();
+        for(List<LatLng> points:pointsList)
+            mMapPlotter.plotRoute(points, colorRgb);
+
+        mDrawer.closeDrawer(GravityCompat.START);
+
+        return true;
+    }
+
+    public MapPlotter getmMapPlotter() {
+        return mMapPlotter;
     }
 }
