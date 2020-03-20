@@ -1,8 +1,9 @@
 package com.example.haolun.madisonbus;
 
-import android.content.Context;
+import android.app.ApplicationErrorReport;
 import android.util.Log;
-import android.util.Pair;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,32 +49,54 @@ public class Info {
         }
     }
 
-    public Pair<Float, Float> getStopGPSPosition(String stopName) throws JSONException {
-        String latitute;
-        String longitute;
-        latitute = stops.getJSONObject(stopName).getString("latitute");
-        longitute = stops.getJSONObject(stopName).getString("longitute");
+    public LatLng getStopGPSPosition(String stopName) throws JSONException {
+        String latitude;
+        String longitude;
+        latitude = stops.getJSONObject(stopName).getString("latitute");
+        longitude = stops.getJSONObject(stopName).getString("longitute");
 
-        Pair<Float, Float> ret = Pair.create(Float.parseFloat(latitute), Float.parseFloat(longitute));
-        return ret;
+        return new LatLng(Float.parseFloat(latitude), Float.parseFloat(longitude));
     }
 
     public int getNumStops() {
         return routes.length();
     }
 
-    public List<Pair<Float, Float>> getRouteByName(String routeName) throws JSONException {
-        JSONArray routesDict = routes.getJSONArray(routeName);
-        List<Pair<Float, Float>> ret = new LinkedList<>();
-        JSONArray position;
-        String latitute;
-        String longitute;
-        for(int i = 0; i < routesDict.length(); i++) {
-            position = routesDict.getJSONArray(i);
-            latitute = position.getString(0);
-            longitute = position.getString(1);
-            ret.add(Pair.create(Float.parseFloat(latitute), Float.parseFloat(longitute)));
+    public List<String> getRoutesName() {
+        List<String> ret = new LinkedList<>();
+        String stopName;
+        Iterator<String> iter = routes.keys(); //This should be the iterator you want.
+        while(iter.hasNext()){
+            stopName = iter.next();
+            ret.add(stopName);
         }
+        return ret;
+    }
+
+    public List<List<LatLng>> getRoutesByName(String routeName) {
+        List<List<LatLng>> ret = new LinkedList<>();
+        try{
+            JSONArray routesByName = routes.getJSONObject(routeName).getJSONArray("route");
+            List<LatLng> tmp;
+            JSONArray position;
+            String latitude;
+            String longitude;
+            Log.d(TAG, routeName + ":" + String.valueOf(routesByName.length()));
+            for(int i = 0; i < routesByName.length(); i++) {
+                tmp = new LinkedList<>();
+                JSONArray oneOfRoutes = routesByName.getJSONArray(i);
+                for(int j = 0; j < oneOfRoutes.length(); j++) {
+                    position = oneOfRoutes.getJSONArray(j);
+                    latitude = position.getString(0);
+                    longitude = position.getString(1);
+                    tmp.add(new LatLng(Float.parseFloat(latitude), Float.parseFloat(longitude)));
+                }
+                ret.add(tmp);
+            }
+        } catch (JSONException e) {
+            throw new Error(e.toString());
+        }
+
         return ret;
     }
 
@@ -81,4 +105,13 @@ public class Info {
     private JSONObject routes;
     private final String stopsJson;
     private final String routesJson;
+
+    public String getColorByName(String routeName) {
+        try {
+            String color = routes.getJSONObject(routeName).getString("color");
+            return "#" + color;
+        } catch (JSONException e) {
+            throw new Error(e.toString());
+        }
+    }
 }
