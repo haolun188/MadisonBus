@@ -2,7 +2,7 @@ package com.example.haolun.madisonbus;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.FrameMetrics;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
 
@@ -30,8 +30,10 @@ public class MainActivity extends AppCompatActivity{
     private final String TAG = "MainActivity";
 
     private AppBarConfiguration mAppBarConfiguration;
+    private NavigationView mNavigationView;
     private Menu mMenu;
     private Info info;
+    private DrawerLayout mDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,31 +44,37 @@ public class MainActivity extends AppCompatActivity{
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        mMenu = navigationView.getMenu();
+        mDrawer = findViewById(R.id.drawer_layout);
+        mNavigationView = findViewById(R.id.nav_view);
+        mMenu = mNavigationView.getMenu();
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-
-        mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.map)
-                .setDrawerLayout(drawer)
-                .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        mAppBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph())
+                .setDrawerLayout(mDrawer)
+                .build();
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
+        NavigationUI.setupWithNavController(mNavigationView, navController);
+
+        mNavigationView.setNavigationItemSelectedListener(this);//TODO: onclick
     }
 
     private void initDrawerMenu() {
-        int numRoutes = info.getNumStops();
-        //TODO: know how to plot in google map and re-evaluate if Navigation Components are needed
-    }
+        List<String> routesName = info.getRoutesName();
+        //TODO: adjust icon color and shape
 
+        for(int i = 0; i < routesName.size(); i++) {
+            MenuItem newItem = mMenu.add(routesName.get(i));
+            newItem.setIcon(R.drawable.ic_directions_bus_black_24dp);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        initDrawerMenu();
         return true;
     }
 
