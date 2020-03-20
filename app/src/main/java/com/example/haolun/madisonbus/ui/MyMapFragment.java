@@ -2,6 +2,8 @@ package com.example.haolun.madisonbus.ui;
 
 import android.os.Bundle;
 
+import com.example.haolun.madisonbus.MainActivity;
+import com.example.haolun.madisonbus.MapPlotter;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -14,7 +16,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * Created by Haolun on 2020-03-18.
  */
 public class MyMapFragment extends SupportMapFragment implements OnMapReadyCallback {
-    private GoogleMap mMap;
+    private MapPlotter mMap;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -24,13 +26,9 @@ public class MyMapFragment extends SupportMapFragment implements OnMapReadyCallb
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        mMap = ((MainActivity)getActivity()).getmMapPlotter();
 
-        // Add a marker in Sydney and move the camera
-        LatLng home = new LatLng(43.072538, -89.458626);
-        mMap.addMarker(new MarkerOptions().position(home).title("Marker at home"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(home));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(home, 15));
-
+        mMap.setMap(googleMap);
+        mMap.initialize();
     }
 }
