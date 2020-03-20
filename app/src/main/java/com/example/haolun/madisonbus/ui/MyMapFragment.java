@@ -26,9 +26,6 @@ public class MyMapFragment extends SupportMapFragment implements OnMapReadyCallb
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = ((MainActivity)getActivity()).getmMapPlotter();
-
-        mMap.setMap(googleMap);
-        mMap.initialize();
+        ((MainActivity)getActivity()).onMapReady(googleMap);
     }
 }

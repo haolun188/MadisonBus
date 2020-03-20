@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.Menu;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
 
@@ -98,7 +99,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    public MapPlotter getmMapPlotter() {
-        return mMapPlotter;
+    public void onMapReady(GoogleMap map) {
+        mMapPlotter.setMap(map);
+        mMapPlotter.initialize(this);
+        mMapPlotter.plotStops(info.getStopsGPSPosition());
     }
 }

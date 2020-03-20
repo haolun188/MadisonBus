@@ -49,13 +49,24 @@ public class Info {
         }
     }
 
-    public LatLng getStopGPSPosition(String stopName) throws JSONException {
+    public List<LatLng> getStopsGPSPosition() {
+        List<LatLng> ret = new LinkedList<>();
+        String stopName;
         String latitude;
         String longitude;
-        latitude = stops.getJSONObject(stopName).getString("latitute");
-        longitude = stops.getJSONObject(stopName).getString("longitute");
+        try {
+            Iterator<String> iter = stops.keys(); //This should be the iterator you want.
+            while(iter.hasNext()){
+                stopName = iter.next();
+                latitude = stops.getJSONObject(stopName).getString("latitude");
+                longitude = stops.getJSONObject(stopName).getString("longitude");
+                ret.add(new LatLng(Float.parseFloat(latitude), Float.parseFloat(longitude)));
+            }
+        } catch (JSONException e) {
+            throw new Error(e.toString());
+        }
 
-        return new LatLng(Float.parseFloat(latitude), Float.parseFloat(longitude));
+        return ret;
     }
 
     public int getNumStops() {
