@@ -40,13 +40,14 @@ public class MapPlotter {
     }
 
     public void initialize(Context context) {
-        //TODO: user's location
-        LatLng home = new LatLng(43.072538, -89.458626);
-        mMap.addMarker(new MarkerOptions().position(home).title("Marker at home"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(home));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(home, 15));
-
         stopIcon = bitmapDescriptorFromVector(context, R.drawable.ic_directions_bus_black_24dp);
+    }
+
+    public void setUserLocation(LatLng location, boolean plotUserMarker) {
+        if(plotUserMarker) // TODO: update marker icon
+            mMap.addMarker(new MarkerOptions().position(location).title("Marker at home"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
     }
 
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
@@ -65,11 +66,6 @@ public class MapPlotter {
                     .position(stop)
                     .icon(stopIcon));
         }
-    }
-
-    public LatLng getUserLocation() {
-        //TODO
-        return new LatLng(0,0);
     }
 
     public void removeRouteFromMap() {
