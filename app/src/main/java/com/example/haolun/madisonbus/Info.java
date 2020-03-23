@@ -76,7 +76,7 @@ public class Info {
     public List<String> getRoutesName() {
         List<String> ret = new LinkedList<>();
         String stopName;
-        Iterator<String> iter = routes.keys(); //This should be the iterator you want.
+        Iterator<String> iter = routes.keys();
         while(iter.hasNext()){
             stopName = iter.next();
             ret.add(stopName);
@@ -109,6 +109,31 @@ public class Info {
         }
 
         return ret;
+    }
+
+    public String getNameById(String routeId) {
+        String name;
+        JSONArray ids;
+        String id;
+        Iterator<String> iter = routes.keys();
+        while(iter.hasNext()){
+            name = iter.next();
+            try {
+                ids = routes.getJSONObject(name).getJSONArray("route_id");
+            } catch (JSONException e) {
+                throw new Error(e.toString());
+            }
+            for(int i = 0; i < ids.length(); i++) {
+                try {
+                    id = ids.getString(i);
+                } catch (JSONException e) {
+                    throw new Error(e.toString());
+                }
+                if(id == routeId)
+                    return name;
+            }
+        }
+        return null;
     }
 
     private final String TAG = "Info";

@@ -7,6 +7,10 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import com.example.haolun.madisonbus.buslocation.RetrofitBusInstance;
+import com.example.haolun.madisonbus.buslocation.RetrofitBusLocationClient;
+import com.example.haolun.madisonbus.buslocation.RetrofitBusLocationInstance;
+import com.example.haolun.madisonbus.buslocation.RetrofitBusLocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -18,9 +22,14 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import androidx.annotation.DrawableRes;
 import androidx.core.content.ContextCompat;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by Haolun on 2020-03-18.
@@ -30,17 +39,48 @@ public class MapPlotter {
     private GoogleMap mMap;
     private List<Polyline> mPolyLine;
     private BitmapDescriptor stopIcon;
+    private String busSelected;
+    private Info mInfo;
+    private Timer mTimer;
+    private Callback<RetrofitBusLocationInstance> mBusLocationCallback;
 
-    public MapPlotter() {
+    public MapPlotter(Info info) {
         mPolyLine = new LinkedList<>();
+        busSelected = "";
+        mInfo = info;
     }
 
     public void setMap(GoogleMap m) {
         mMap = m;
     }
 
+    public void setBusSelected(String busSelected) {
+        this.busSelected = busSelected;
+    }
     public void initialize(Context context) {
         stopIcon = bitmapDescriptorFromVector(context, R.drawable.ic_directions_bus_black_24dp);
+
+        mBusLocationCallback = new Callback<RetrofitBusLocationInstance>() {
+            @Override
+            public void onResponse(Call<RetrofitBusLocationInstance> call, Response<RetrofitBusLocationInstance> response) {
+                RetrofitBusLocationInstance retrofitBusLocationInstance = response.body();
+                for(RetrofitBusInstance bus:retrofitBusLocationInstance.getBusList()){
+                    String routeName = mInfo.getNameById(bus.getRouteId());
+                    if(routeName == busSelected) {
+                        // plot bus' real-time location on map
+                        mMap.addMarker(new MarkerOptions()
+                                .position(bus.getPosition())
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_directions_bus_black_16dp)));
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<RetrofitBusLocationInstance> call, Throwable t) {
+                Log.d(TAG, t.toString());
+            }
+        };
+
+        this.startPlotBusesRealTimeLocation();
     }
 
     public void setUserLocation(LatLng location, boolean plotUserMarker) {
@@ -59,8 +99,8 @@ public class MapPlotter {
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
-    public void plotStops(List<LatLng> stops) {
-        for(LatLng stop:stops) {
+    public void plotStops() {
+        for(LatLng stop:mInfo.getStopsGPSPosition()) {
             //TODO: update stop icon
             mMap.addMarker(new MarkerOptions()
                     .position(stop)
@@ -81,5 +121,27 @@ public class MapPlotter {
                 .visible(true);
 
         mPolyLine.add(mMap.addPolyline(options));
+    }
+
+    public void startPlotBusesRealTimeLocation() {
+        Log.d(TAG, "Plot bus ");
+        if(mBusLocationCallback == null)
+            return;
+        RetrofitBusLocationService service = RetrofitBusLocationClient.getRetrofitInstance().create(RetrofitBusLocationService.class);
+        TimerTask mQueryBusLocationTask = new TimerTask() {
+            @Override
+            public void run() {
+                Log.d(TAG, "Querying");
+                Call<RetrofitBusLocationInstance> call = service.getAllBusLocation();
+                call.enqueue(mBusLocationCallback);
+            }
+        };
+        mTimer = new Timer();
+        mTimer.schedule(mQueryBusLocationTask, 0, 10000);
+    }
+
+    public void stopPlotBusesRealTimeLocation() {
+        Log.d(TAG, "Plot cancelled");
+        mTimer.cancel();
     }
 }

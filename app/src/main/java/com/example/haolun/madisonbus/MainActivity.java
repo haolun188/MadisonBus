@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         info = new Info(getResources().openRawResource(R.raw.stops), getResources().openRawResource(R.raw.routes));
-        mMapPlotter = new MapPlotter();
+        mMapPlotter = new MapPlotter(info);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -69,18 +69,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(mNavigationView, navController);
         mNavigationView.setNavigationItemSelectedListener(this);
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.ACCESS_NETWORK_STATE},
+                    101);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         startUserLocationUpdates();
+        mMapPlotter.startPlotBusesRealTimeLocation();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         fusedLocationClient.removeLocationUpdates(new LocationCallback());
+        mMapPlotter.stopPlotBusesRealTimeLocation();
     }
 
     private void initDrawerMenu() {
@@ -110,12 +117,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        //TODO: plot routes
         String routeName = item.getTitle().toString();
         List<List<LatLng>> pointsList = info.getRoutesByName(routeName);
         String colorRgb = info.getColorByName(routeName);
-        Log.d(TAG, colorRgb);
 
+        mMapPlotter.setBusSelected(routeName);
         mMapPlotter.removeRouteFromMap();
         for(List<LatLng> points:pointsList)
             mMapPlotter.plotRoute(points, colorRgb);
@@ -139,14 +145,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setUserLocationOnMap();
         }
 
-        mMapPlotter.plotStops(info.getStopsGPSPosition());
+        mMapPlotter.plotStops();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        setUserLocationOnMap();
+        for(int code:grantResults) {
+            if(code == 100)
+                setUserLocationOnMap();
+        }
     }
 
     private void setUserLocationOnMap() {
