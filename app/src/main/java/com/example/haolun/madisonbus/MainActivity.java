@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
         startUserLocationUpdates();
-        mMapPlotter.startPlotBusesRealTimeLocation();
+        mMapPlotter.startPeriodicallyPlotBusesLocation();
     }
 
     @Override
@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mMapPlotter.removeRouteFromMap();
         for(List<LatLng> points:pointsList)
             mMapPlotter.plotRoute(points, colorRgb);
+        mMapPlotter.plotBusesLocation();
 
         mDrawer.closeDrawer(GravityCompat.START);
 
@@ -145,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setUserLocationOnMap();
         }
 
-        mMapPlotter.plotStops();
+//        mMapPlotter.plotStops();
     }
 
     @Override
@@ -166,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
-                            mMapPlotter.setUserLocation(new LatLng(location.getLatitude(), location.getLongitude()), true);
+                            mMapPlotter.plotUserLocation(new LatLng(location.getLatitude(), location.getLongitude()), true, true);
                         }
                         startUserLocationUpdates();
                     }
@@ -175,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         LatLng madison = new LatLng(43.073190, -89.404951);
-                        mMapPlotter.setUserLocation(madison, false);
+                        mMapPlotter.plotUserLocation(madison, false, true);
                     }
                 });
     }
@@ -195,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 if (locationResult != null) {
-                    mMapPlotter.setUserLocation(new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude()), true);
+                    mMapPlotter.plotUserLocation(new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude()), true, false);
                 }
             }
         };

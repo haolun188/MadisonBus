@@ -43,7 +43,6 @@ public class Info {
         try {
             stops = new JSONObject(stopsJson);
             routes = new JSONObject(routesJson);
-            Log.d(TAG, String.valueOf(routes.length()));
         } catch (JSONException e) {
             throw new Error(e.toString());
         }
@@ -129,7 +128,7 @@ public class Info {
                 } catch (JSONException e) {
                     throw new Error(e.toString());
                 }
-                if(id == routeId)
+                if(id.equals(routeId))
                     return name;
             }
         }
