@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        startLocationUpdates();
+        startUserLocationUpdates();
     }
 
     @Override
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (location != null) {
                             mMapPlotter.setUserLocation(new LatLng(location.getLatitude(), location.getLongitude()), true);
                         }
-                        startLocationUpdates();
+                        startUserLocationUpdates();
                     }
                 })
                 .addOnFailureListener(this, new OnFailureListener() {
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
     }
 
-    private void startLocationUpdates() {
+    private void startUserLocationUpdates() {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             return;
