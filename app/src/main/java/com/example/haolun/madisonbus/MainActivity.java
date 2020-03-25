@@ -37,6 +37,7 @@ import androidx.appcompat.widget.Toolbar;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     private final String TAG = "MainActivity";
 
+    private Toolbar mToolbar;
     private AppBarConfiguration mAppBarConfiguration;
     private NavigationView mNavigationView;
     private Menu mMenu;
@@ -54,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mMapPlotter = new MapPlotter(info);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
         mDrawer = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
         mMenu = mNavigationView.getMenu();
@@ -120,6 +121,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String routeName = item.getTitle().toString();
         List<List<LatLng>> pointsList = info.getRoutesByName(routeName);
         String colorRgb = info.getColorByName(routeName);
+
+        mToolbar.setTitle(routeName);
+        mToolbar.setBackgroundColor(Color.parseColor(colorRgb));
 
         mMapPlotter.setBusSelected(routeName);
         mMapPlotter.removeRouteFromMap();
