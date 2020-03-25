@@ -9,8 +9,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.Menu;
-import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
@@ -53,8 +51,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapPlotter mMapPlotter;
     private FusedLocationProviderClient fusedLocationClient;
 
-    private Map<String, Integer> starRouteToItemIdMap;
-    private Map<String, Integer> routeToItemIdMap;
+    private Map<String, Boolean> starredRoutesMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mNavigationView = findViewById(R.id.nav_view);
         mMenu = mNavigationView.getMenu();
 
-        starRouteToItemIdMap = new HashMap<>();
-        routeToItemIdMap = new HashMap<>();
+        starredRoutesMap = new HashMap<>();
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -106,62 +102,86 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initDrawerMenu() {
         List<String> routesName = info.getRoutesName();
-        //TODO: adjust icon color and shape
 
+        // Set up title
+        MenuItem starRoutesTitle = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, getString(R.string.starred_route_title));
+        starRoutesTitle.setEnabled(false);
+        // Add routes
         for(int i = 0; i < routesName.size(); i++) {
             String routeName = routesName.get(i);
-            MenuItem newItem = mMenu.add(R.id.all_group, Menu.NONE, Menu.NONE, routeName);
-            routeToItemIdMap.put(routeName, newItem.getItemId());
+            MenuItem newItem = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, routeName);
             newItem.setActionView(R.layout.btn_star);
             LinearLayout linearLayout = (LinearLayout) newItem.getActionView();
             ImageButton starButton = (ImageButton) linearLayout.getChildAt(0);
-            starButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Click " + routeName);
-                    ImageButton imageButton = (ImageButton)v;
-                    if(!starRouteToItemIdMap.containsKey(routeName)) {
-                        // Mark a route as starred route
-                        starRoute(imageButton, routeName);
-                    } else {
-                        // Cancel a starred route
-                        // change the icon
-                        imageButton.setImageResource(R.drawable.ic_star_border_black_24dp);
-                        // remove the route from star group
-                    }
+            starButton.setImageResource(R.drawable.ic_star_orange_light_24dp);
+            starButton.setOnClickListener(v -> {
+                // Cancel a starred route
+                removeStarredRoute(routeName);
+            });
+            newItem.setVisible(false);
+        }
+
+        // Set up title
+        MenuItem allRoutesTitle = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, getString(R.string.all_routes_title));
+        allRoutesTitle.setEnabled(false);
+        // Add routes
+        for(int i = 0; i < routesName.size(); i++) {
+            String routeName = routesName.get(i);
+            MenuItem newItem = mMenu.add(R.id.all_group, Menu.NONE, Menu.NONE, routeName);
+            newItem.setActionView(R.layout.btn_star);
+            LinearLayout linearLayout = (LinearLayout) newItem.getActionView();
+            ImageButton starButton = (ImageButton) linearLayout.getChildAt(0);
+            starButton.setOnClickListener(v -> {
+                Log.d(TAG, "Click " + routeName);
+                ImageButton imageButton = (ImageButton)v;
+                if(!starredRoutesMap.containsKey(routeName)) {
+                    // Mark a route as starred route
+                    starRoute(routeName);
+                } else {
+                    // Cancel a starred route
+                    // remove the route from star group
+                    removeStarredRoute(routeName);
                 }
             });
         }
     }
 
-    private void starRoute(ImageButton imageButton, String routeName) {
-        // change the icon
-        imageButton.setImageResource(R.drawable.ic_star_black_24dp);
-        // add the route to star group
-        MenuItem newItem = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, routeName);
-        starRouteToItemIdMap.put(routeName, newItem.getItemId());
-        newItem.setActionView(R.layout.btn_star);
-        LinearLayout linearLayout = (LinearLayout) newItem.getActionView();
-        ImageButton starButton = (ImageButton) linearLayout.getChildAt(0);
-        starButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                removeStarredRoute(routeName);
+    private void starRoute(String routeName) {
+        starredRoutesMap.put(routeName, true);
+        // Show the menu item in starred group
+        for(int i = 0; i < mMenu.size(); i++) {
+            if(mMenu.getItem(i).getTitle() == routeName) {
+                mMenu.getItem(i).setVisible(true);
+                break;
             }
-        });
-        // Re-render the menu
+        }
+        // change the icon
+        for(int i = 0; i < mMenu.size(); i++) {
+            if(mMenu.getItem(i).getTitle() == routeName) {
+                ImageButton imageButton = (ImageButton) ((LinearLayout)mMenu.getItem(i).getActionView()).getChildAt(0);
+                imageButton.setImageResource(R.drawable.ic_star_orange_light_24dp);
+            }
+        }
     }
 
     private void removeStarredRoute(String routeName) {
-        if(!starRouteToItemIdMap.containsKey(routeName))
+        if(!starredRoutesMap.containsKey(routeName))
             throw new Error("Route " + routeName + " is not starred.");
 
-        int starId = starRouteToItemIdMap.get(routeName);
-        mMenu.removeItem(starId);
-
-        int routeId = routeToItemIdMap.get(routeName);
+        starredRoutesMap.remove(routeName);
+        // Hide the menu item in starred group
         for(int i = 0; i < mMenu.size(); i++) {
-            Log.d(TAG, i + ":" + mMenu.getItem(i).getTitle().toString());
+            if(mMenu.getItem(i).getTitle() == routeName) {
+                mMenu.getItem(i).setVisible(false);
+                break;
+            }
+        }
+        // change the icon
+        for(int i = 0; i < mMenu.size(); i++) {
+            if(mMenu.getItem(i).getTitle() == routeName) {
+                ImageButton imageButton = (ImageButton) ((LinearLayout)mMenu.getItem(i).getActionView()).getChildAt(0);
+                imageButton.setImageResource(R.drawable.ic_star_border_orange_light_24dp);
+            }
         }
     }
 

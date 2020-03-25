@@ -3,10 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:id="@+id/star_group">
-        <item android:title="@string/starred_route_title" android:enabled="false"/>
-    </group>
-    <group android:id="@+id/all_group">
-        <item android:title="@string/all_routes_title" android:enabled="false"/>
-    </group>
+    <group android:id="@+id/star_group"/>
+    <group android:id="@+id/all_group"/>
 </menu>
