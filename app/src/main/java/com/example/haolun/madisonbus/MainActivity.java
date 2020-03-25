@@ -2,12 +2,17 @@ package com.example.haolun.madisonbus;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.Menu;
+import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -20,7 +25,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -46,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapPlotter mMapPlotter;
     private FusedLocationProviderClient fusedLocationClient;
 
+    private Map<String, Integer> starRouteToItemIdMap;
+    private Map<String, Integer> routeToItemIdMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawer = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
         mMenu = mNavigationView.getMenu();
+
+        starRouteToItemIdMap = new HashMap<>();
+        routeToItemIdMap = new HashMap<>();
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -96,15 +109,66 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //TODO: adjust icon color and shape
 
         for(int i = 0; i < routesName.size(); i++) {
-            MenuItem newItem = mMenu.add(routesName.get(i));
-            newItem.setIcon(R.drawable.ic_directions_bus_black_24dp);
+            String routeName = routesName.get(i);
+            MenuItem newItem = mMenu.add(R.id.all_group, Menu.NONE, Menu.NONE, routeName);
+            routeToItemIdMap.put(routeName, newItem.getItemId());
+            newItem.setActionView(R.layout.btn_star);
+            LinearLayout linearLayout = (LinearLayout) newItem.getActionView();
+            ImageButton starButton = (ImageButton) linearLayout.getChildAt(0);
+            starButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "Click " + routeName);
+                    ImageButton imageButton = (ImageButton)v;
+                    if(!starRouteToItemIdMap.containsKey(routeName)) {
+                        // Mark a route as starred route
+                        starRoute(imageButton, routeName);
+                    } else {
+                        // Cancel a starred route
+                        // change the icon
+                        imageButton.setImageResource(R.drawable.ic_star_border_black_24dp);
+                        // remove the route from star group
+                    }
+                }
+            });
+        }
+    }
+
+    private void starRoute(ImageButton imageButton, String routeName) {
+        // change the icon
+        imageButton.setImageResource(R.drawable.ic_star_black_24dp);
+        // add the route to star group
+        MenuItem newItem = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, routeName);
+        starRouteToItemIdMap.put(routeName, newItem.getItemId());
+        newItem.setActionView(R.layout.btn_star);
+        LinearLayout linearLayout = (LinearLayout) newItem.getActionView();
+        ImageButton starButton = (ImageButton) linearLayout.getChildAt(0);
+        starButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeStarredRoute(routeName);
+            }
+        });
+        // Re-render the menu
+    }
+
+    private void removeStarredRoute(String routeName) {
+        if(!starRouteToItemIdMap.containsKey(routeName))
+            throw new Error("Route " + routeName + " is not starred.");
+
+        int starId = starRouteToItemIdMap.get(routeName);
+        mMenu.removeItem(starId);
+
+        int routeId = routeToItemIdMap.get(routeName);
+        for(int i = 0; i < mMenu.size(); i++) {
+            Log.d(TAG, i + ":" + mMenu.getItem(i).getTitle().toString());
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+//        getMenuInflater().inflate(R.menu.main, menu);
         initDrawerMenu();
         return true;
     }
