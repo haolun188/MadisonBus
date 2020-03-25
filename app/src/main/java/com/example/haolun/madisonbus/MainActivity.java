@@ -2,12 +2,15 @@ package com.example.haolun.madisonbus;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.Menu;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -20,7 +23,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -46,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapPlotter mMapPlotter;
     private FusedLocationProviderClient fusedLocationClient;
 
+    private Map<String, Boolean> starredRoutesMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawer = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
         mMenu = mNavigationView.getMenu();
+
+        starredRoutesMap = new HashMap<>();
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -93,18 +102,93 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void initDrawerMenu() {
         List<String> routesName = info.getRoutesName();
-        //TODO: adjust icon color and shape
 
+        // Set up title
+        MenuItem starRoutesTitle = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, getString(R.string.starred_route_title));
+        starRoutesTitle.setEnabled(false);
+        // Add routes
         for(int i = 0; i < routesName.size(); i++) {
-            MenuItem newItem = mMenu.add(routesName.get(i));
-            newItem.setIcon(R.drawable.ic_directions_bus_black_24dp);
+            String routeName = routesName.get(i);
+            MenuItem newItem = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, routeName);
+            newItem.setActionView(R.layout.btn_star);
+            LinearLayout linearLayout = (LinearLayout) newItem.getActionView();
+            ImageButton starButton = (ImageButton) linearLayout.getChildAt(0);
+            starButton.setImageResource(R.drawable.ic_star_orange_light_24dp);
+            starButton.setOnClickListener(v -> {
+                // Cancel a starred route
+                removeStarredRoute(routeName);
+            });
+            newItem.setVisible(false);
+        }
+
+        // Set up title
+        MenuItem allRoutesTitle = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, getString(R.string.all_routes_title));
+        allRoutesTitle.setEnabled(false);
+        // Add routes
+        for(int i = 0; i < routesName.size(); i++) {
+            String routeName = routesName.get(i);
+            MenuItem newItem = mMenu.add(R.id.all_group, Menu.NONE, Menu.NONE, routeName);
+            newItem.setActionView(R.layout.btn_star);
+            LinearLayout linearLayout = (LinearLayout) newItem.getActionView();
+            ImageButton starButton = (ImageButton) linearLayout.getChildAt(0);
+            starButton.setOnClickListener(v -> {
+                Log.d(TAG, "Click " + routeName);
+                ImageButton imageButton = (ImageButton)v;
+                if(!starredRoutesMap.containsKey(routeName)) {
+                    // Mark a route as starred route
+                    starRoute(routeName);
+                } else {
+                    // Cancel a starred route
+                    // remove the route from star group
+                    removeStarredRoute(routeName);
+                }
+            });
+        }
+    }
+
+    private void starRoute(String routeName) {
+        starredRoutesMap.put(routeName, true);
+        // Show the menu item in starred group
+        for(int i = 0; i < mMenu.size(); i++) {
+            if(mMenu.getItem(i).getTitle() == routeName) {
+                mMenu.getItem(i).setVisible(true);
+                break;
+            }
+        }
+        // change the icon
+        for(int i = 0; i < mMenu.size(); i++) {
+            if(mMenu.getItem(i).getTitle() == routeName) {
+                ImageButton imageButton = (ImageButton) ((LinearLayout)mMenu.getItem(i).getActionView()).getChildAt(0);
+                imageButton.setImageResource(R.drawable.ic_star_orange_light_24dp);
+            }
+        }
+    }
+
+    private void removeStarredRoute(String routeName) {
+        if(!starredRoutesMap.containsKey(routeName))
+            throw new Error("Route " + routeName + " is not starred.");
+
+        starredRoutesMap.remove(routeName);
+        // Hide the menu item in starred group
+        for(int i = 0; i < mMenu.size(); i++) {
+            if(mMenu.getItem(i).getTitle() == routeName) {
+                mMenu.getItem(i).setVisible(false);
+                break;
+            }
+        }
+        // change the icon
+        for(int i = 0; i < mMenu.size(); i++) {
+            if(mMenu.getItem(i).getTitle() == routeName) {
+                ImageButton imageButton = (ImageButton) ((LinearLayout)mMenu.getItem(i).getActionView()).getChildAt(0);
+                imageButton.setImageResource(R.drawable.ic_star_border_orange_light_24dp);
+            }
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+//        getMenuInflater().inflate(R.menu.main, menu);
         initDrawerMenu();
         return true;
     }
