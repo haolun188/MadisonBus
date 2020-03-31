@@ -62,7 +62,7 @@ public class MapPlotter {
         this.busSelected = busSelected;
     }
     public void initialize(Context context) {
-        stopIcon = bitmapDescriptorFromVector(context, R.drawable.ic_directions_bus_black_24dp); //TODO: update icon
+        stopIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_stop);
         busIcon = bitmapDescriptorFromVector(context, R.drawable.ic_directions_bus_black_16dp); //TODO: update icon
 
         mBusLocationCallback = new Callback<RetrofitBusLocationInstance>() {

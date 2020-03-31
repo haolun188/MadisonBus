@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setUserLocationOnMap();
         }
 
-//        mMapPlotter.plotStops();
+        mMapPlotter.plotStops();
     }
 
     @Override
