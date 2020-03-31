@@ -41,6 +41,7 @@ public class MapPlotter {
     private List<Polyline> mPolyLine;
     private BitmapDescriptor stopIcon;
     private BitmapDescriptor busIcon;
+    private BitmapDescriptor userIcon;
     private String busSelected;
     private Info mInfo;
     private Timer mTimer;
@@ -64,6 +65,7 @@ public class MapPlotter {
     public void initialize(Context context) {
         stopIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_stop);
         busIcon = bitmapDescriptorFromVector(context, R.drawable.ic_directions_bus_black_16dp); //TODO: update icon
+        userIcon = bitmapDescriptorFromVector(context, R.drawable.ic_dot);
 
         mBusLocationCallback = new Callback<RetrofitBusLocationInstance>() {
             @Override
@@ -82,7 +84,7 @@ public class MapPlotter {
 
     public void plotUserLocation(LatLng location, boolean plotUserMarker, boolean moveCamera) {
         if(plotUserMarker) // TODO: update marker icon
-            mMap.addMarker(new MarkerOptions().position(location).title("Marker at home"));
+            mMap.addMarker(new MarkerOptions().position(location).icon(userIcon));
         if(moveCamera) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
