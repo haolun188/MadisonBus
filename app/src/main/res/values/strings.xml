@@ -6,5 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="starred_route_title">Starred Routes</string>
     <string name="all_routes_title">All Routes</string>
+    <string name="starredRouteKey">starredRoutes</string>
 
 </resources>

@@ -1,6 +1,8 @@
 package com.example.haolun.madisonbus;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -23,11 +25,16 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -51,7 +58,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapPlotter mMapPlotter;
     private FusedLocationProviderClient fusedLocationClient;
 
-    private Map<String, Boolean> starredRoutesMap;
+    private SharedPreferences mSharedPref;
+    private Set<String> mStarredRoutesSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mNavigationView = findViewById(R.id.nav_view);
         mMenu = mNavigationView.getMenu();
 
-        starredRoutesMap = new HashMap<>();
+        mStarredRoutesSet = new HashSet<>();
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -103,6 +111,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initDrawerMenu() {
         List<String> routesName = info.getRoutesName();
 
+        //TODO: shared preference
+        mSharedPref = getPreferences(Context.MODE_PRIVATE);
+        mStarredRoutesSet = mSharedPref.getStringSet(getString(R.string.starredRouteKey), mStarredRoutesSet);
+        Log.d(TAG, mStarredRoutesSet.toString());
+
         // Set up title
         MenuItem starRoutesTitle = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, getString(R.string.starred_route_title));
         starRoutesTitle.setEnabled(false);
@@ -118,7 +131,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Cancel a starred route
                 removeStarredRoute(routeName);
             });
-            newItem.setVisible(false);
+            if(mStarredRoutesSet.contains(routeName))
+                newItem.setVisible(true);
+            else
+                newItem.setVisible(false);
         }
 
         // Set up title
@@ -134,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             starButton.setOnClickListener(v -> {
                 Log.d(TAG, "Click " + routeName);
                 ImageButton imageButton = (ImageButton)v;
-                if(!starredRoutesMap.containsKey(routeName)) {
+                if(!mStarredRoutesSet.contains(routeName)) {
                     // Mark a route as starred route
                     starRoute(routeName);
                 } else {
@@ -143,11 +159,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     removeStarredRoute(routeName);
                 }
             });
+
+            // Set user-saved starred route
+            if(mStarredRoutesSet.contains(routeName)) {
+                starButton.setImageResource(R.drawable.ic_star_orange_light_24dp);
+            }
         }
     }
 
     private void starRoute(String routeName) {
-        starredRoutesMap.put(routeName, true);
         // Show the menu item in starred group
         for(int i = 0; i < mMenu.size(); i++) {
             if(mMenu.getItem(i).getTitle() == routeName) {
@@ -162,13 +182,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 imageButton.setImageResource(R.drawable.ic_star_orange_light_24dp);
             }
         }
+
+        mStarredRoutesSet.add(routeName);
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putStringSet(getString(R.string.starredRouteKey), mStarredRoutesSet);
+        editor.apply();
     }
 
     private void removeStarredRoute(String routeName) {
-        if(!starredRoutesMap.containsKey(routeName))
+        if(!mStarredRoutesSet.contains(routeName))
             throw new Error("Route " + routeName + " is not starred.");
 
-        starredRoutesMap.remove(routeName);
         // Hide the menu item in starred group
         for(int i = 0; i < mMenu.size(); i++) {
             if(mMenu.getItem(i).getTitle() == routeName) {
@@ -183,6 +207,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 imageButton.setImageResource(R.drawable.ic_star_border_orange_light_24dp);
             }
         }
+
+        // Cannot just update because the return set should be treated as immutable. https://developer.android.com/reference/android/content/SharedPreferences#developer-guides
+        // Create a new set instead
+        mStarredRoutesSet = new HashSet<>(mStarredRoutesSet);
+        mStarredRoutesSet.remove(routeName);
+        SharedPreferences.Editor editor = mSharedPref.edit();
+        editor.putStringSet(getString(R.string.starredRouteKey), mStarredRoutesSet);
+        editor.apply();
     }
 
     @Override
