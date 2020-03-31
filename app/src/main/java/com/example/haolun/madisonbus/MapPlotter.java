@@ -83,7 +83,7 @@ public class MapPlotter {
     }
 
     public void plotUserLocation(LatLng location, boolean plotUserMarker, boolean moveCamera) {
-        if(plotUserMarker) // TODO: update marker icon
+        if(plotUserMarker)
             mMap.addMarker(new MarkerOptions().position(location).icon(userIcon));
         if(moveCamera) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
