@@ -169,7 +169,7 @@ public class MapPlotter {
         if(mBusLocationCallback == null)
             return;
         mTimer = new Timer();
-        mTimer.schedule(generateQueryBusLocationTask(), 0, 10000);
+        mTimer.schedule(generateQueryBusLocationTask(), 0, 5000);
     }
 
     public void stopPlotBusesRealTimeLocation() {
