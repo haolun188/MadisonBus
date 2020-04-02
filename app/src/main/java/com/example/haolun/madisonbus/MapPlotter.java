@@ -177,6 +177,7 @@ public class MapPlotter {
     }
 
     public void stopPlotBusesRealTimeLocation() {
-        mTimer.cancel();
+        if(mTimer != null)
+            mTimer.cancel();
     }
 }
