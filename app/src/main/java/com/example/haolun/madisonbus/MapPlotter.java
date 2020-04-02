@@ -47,6 +47,7 @@ public class MapPlotter {
     private Timer mTimer;
     private Callback<RetrofitBusLocationInstance> mBusLocationCallback;
     private List<Marker> mRealTimeBuses;
+    private Marker mUserMarker;
 
     public MapPlotter(Info info) {
         mPolyLine = new LinkedList<>();
@@ -83,8 +84,11 @@ public class MapPlotter {
     }
 
     public void plotUserLocation(LatLng location, boolean plotUserMarker, boolean moveCamera) {
-        if(plotUserMarker)
-            mMap.addMarker(new MarkerOptions().position(location).icon(userIcon));
+        if(plotUserMarker) {
+            if(mUserMarker != null)
+                mUserMarker.remove();
+            mUserMarker = mMap.addMarker(new MarkerOptions().position(location).icon(userIcon));
+        }
         if(moveCamera) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));

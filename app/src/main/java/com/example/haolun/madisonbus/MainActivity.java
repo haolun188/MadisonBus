@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.Menu;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
@@ -23,6 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.Collection;
@@ -92,6 +94,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ActivityCompat.requestPermissions(this,
                     new String[] {Manifest.permission.ACCESS_NETWORK_STATE},
                     101);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(view -> setUserLocationOnMap());
     }
 
     @Override
@@ -111,7 +116,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initDrawerMenu() {
         List<String> routesName = info.getRoutesName();
 
-        //TODO: shared preference
         mSharedPref = getPreferences(Context.MODE_PRIVATE);
         mStarredRoutesSet = mSharedPref.getStringSet(getString(R.string.starredRouteKey), mStarredRoutesSet);
         Log.d(TAG, mStarredRoutesSet.toString());
@@ -264,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     100);
         } else {
             setUserLocationOnMap();
+            startUserLocationUpdates();
         }
 
         mMapPlotter.plotStops();
@@ -274,8 +279,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         for(int code:grantResults) {
-            if(code == 100)
+            if(code == 100) {
                 setUserLocationOnMap();
+                startUserLocationUpdates();
+            }
         }
     }
 
@@ -289,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (location != null) {
                             mMapPlotter.plotUserLocation(new LatLng(location.getLatitude(), location.getLongitude()), true, true);
                         }
-                        startUserLocationUpdates();
                     }
                 })
                 .addOnFailureListener(this, new OnFailureListener() {
