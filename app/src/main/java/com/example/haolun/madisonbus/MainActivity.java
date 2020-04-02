@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mSharedPref = getPreferences(Context.MODE_PRIVATE);
         mStarredRoutesSet = mSharedPref.getStringSet(getString(R.string.starredRouteKey), mStarredRoutesSet);
-        Log.d(TAG, mStarredRoutesSet.toString());
 
         // Set up title
         MenuItem starRoutesTitle = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, getString(R.string.starred_route_title));
@@ -152,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             LinearLayout linearLayout = (LinearLayout) newItem.getActionView();
             ImageButton starButton = (ImageButton) linearLayout.getChildAt(0);
             starButton.setOnClickListener(v -> {
-                Log.d(TAG, "Click " + routeName);
                 ImageButton imageButton = (ImageButton)v;
                 if(!mStarredRoutesSet.contains(routeName)) {
                     // Mark a route as starred route
