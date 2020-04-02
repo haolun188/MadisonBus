@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         // Set up title
-        MenuItem allRoutesTitle = mMenu.add(R.id.star_group, Menu.NONE, Menu.NONE, getString(R.string.all_routes_title));
+        MenuItem allRoutesTitle = mMenu.add(R.id.all_group, Menu.NONE, Menu.NONE, getString(R.string.all_routes_title));
         allRoutesTitle.setEnabled(false);
         // Add routes
         for(int i = 0; i < routesName.size(); i++) {
