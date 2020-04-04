@@ -60,6 +60,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.0-alpha05'
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
 }
+configurations.implementation.exclude(group: 'com.google.protobuf', module: 'protobuf-java')
 
 protobuf {
     protoc {
