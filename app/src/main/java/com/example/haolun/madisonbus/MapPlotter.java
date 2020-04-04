@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.example.haolun.madisonbus.retrofit.RetrofitBusInstance;
 import com.example.haolun.madisonbus.retrofit.RetrofitBusLocationClient;
 import com.example.haolun.madisonbus.retrofit.RetrofitBusLocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,10 +40,10 @@ public class MapPlotter {
     private List<Polyline> mPolyLine;
     private BitmapDescriptor stopIcon;
     private BitmapDescriptor busIcon;
-    private BitmapDescriptor busUpIcon;
-    private BitmapDescriptor busDownIcon;
-    private BitmapDescriptor busLeftIcon;
-    private BitmapDescriptor busRightIcon;
+    private BitmapDescriptor bus0Icon;
+    private BitmapDescriptor bus45Icon;
+    private BitmapDescriptor bus90Icon;
+    private BitmapDescriptor bus135Icon;
     private BitmapDescriptor userIcon;
     private String busSelected;
     private Info mInfo;
@@ -70,10 +69,10 @@ public class MapPlotter {
     public void initialize(Context context) {
         stopIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_stop);
         busIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus);
-        busUpIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_up);
-        busDownIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_down);
-        busLeftIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_left);
-        busRightIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_right);
+        bus0Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_0);
+        bus45Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_45);
+        bus90Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_90);
+        bus135Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_135);
         userIcon = bitmapDescriptorFromVector(context, R.drawable.ic_dot);
 
         mBusLocationCallback = new Callback<GtfsRealtimeProtos.FeedMessage>() {
@@ -147,16 +146,16 @@ public class MapPlotter {
                         .position(new LatLng(lat, lng)));
                 switch ((int)feedEntity.getVehicle().getPosition().getBearing()) {
                     case 0:
-                        marker.setIcon(busUpIcon);
+                        marker.setIcon(bus0Icon);
                         break;
                     case 90:
-                        marker.setIcon(busRightIcon);
+                        marker.setIcon(bus90Icon);
                         break;
                     case 180:
-                        marker.setIcon(busDownIcon);
+                        marker.setIcon(bus180Icon);
                         break;
                     case 270:
-                        marker.setIcon(busLeftIcon);
+                        marker.setIcon(bus270Icon);
                         break;
                     default:
                         marker.setIcon(busIcon);
