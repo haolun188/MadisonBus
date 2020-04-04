@@ -1,4 +1,4 @@
-package com.example.haolun.madisonbus.buslocation;
+package com.example.haolun.madisonbus.retrofit;
 
 import com.google.gson.annotations.SerializedName;
 
