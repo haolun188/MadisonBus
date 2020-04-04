@@ -72,11 +72,6 @@ public class MapPlotter {
             @Override
             public void onResponse(Call<GtfsRealtimeProtos.FeedMessage> call, Response<GtfsRealtimeProtos.FeedMessage> response) {
                 GtfsRealtimeProtos.FeedMessage feedMessage = response.body();
-                Log.d(TAG, String.valueOf(feedMessage.getEntityCount()));
-                GtfsRealtimeProtos.FeedEntity feedEntity = feedMessage.getEntity(0);
-
-                GtfsRealtimeProtos.VehiclePosition vp = feedEntity.getVehicle();
-
                 plotRealTimeBuses(feedMessage);
             }
             @Override
