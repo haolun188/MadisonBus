@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.transit.realtime.GtfsRealtimeProtos;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class MapPlotter {
     private String busSelected;
     private Info mInfo;
     private Timer mTimer;
-    private Callback<RetrofitBusLocationInstance> mBusLocationCallback;
+    private Callback<GtfsRealtimeProtos.FeedMessage> mBusLocationCallback;
     private List<Marker> mRealTimeBuses;
     private Marker mUserMarker;
 
@@ -67,14 +68,19 @@ public class MapPlotter {
         busIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus);
         userIcon = bitmapDescriptorFromVector(context, R.drawable.ic_dot);
 
-        mBusLocationCallback = new Callback<RetrofitBusLocationInstance>() {
+        mBusLocationCallback = new Callback<GtfsRealtimeProtos.FeedMessage>() {
             @Override
-            public void onResponse(Call<RetrofitBusLocationInstance> call, Response<RetrofitBusLocationInstance> response) {
-                RetrofitBusLocationInstance retrofitBusLocationInstance = response.body();
-                plotRealTimeBuses(retrofitBusLocationInstance.getBusList());
+            public void onResponse(Call<GtfsRealtimeProtos.FeedMessage> call, Response<GtfsRealtimeProtos.FeedMessage> response) {
+                GtfsRealtimeProtos.FeedMessage feedMessage = response.body();
+                Log.d(TAG, String.valueOf(feedMessage.getEntityCount()));
+                GtfsRealtimeProtos.FeedEntity feedEntity = feedMessage.getEntity(0);
+
+                GtfsRealtimeProtos.VehiclePosition vp = feedEntity.getVehicle();
+
+                plotRealTimeBuses(feedMessage);
             }
             @Override
-            public void onFailure(Call<RetrofitBusLocationInstance> call, Throwable t) {
+            public void onFailure(Call<GtfsRealtimeProtos.FeedMessage> call, Throwable t) {
                 Log.d(TAG, t.toString());
             }
         };
@@ -126,16 +132,19 @@ public class MapPlotter {
         mPolyLine.add(mMap.addPolyline(options));
     }
 
-    public void plotRealTimeBuses(List<RetrofitBusInstance> buses) {
+    public void plotRealTimeBuses(GtfsRealtimeProtos.FeedMessage feedMessage) {
         removeBusesFromMap();
-        for(RetrofitBusInstance bus:buses){
-            String routeName = mInfo.getNameById(bus.getRouteId());
+        for(GtfsRealtimeProtos.FeedEntity feedEntity:feedMessage.getEntityList()){
+            String routeName = mInfo.getNameById(feedEntity.getVehicle().getTrip().getRouteId());
             if(routeName.equals(busSelected)) {
                 // plot bus' real-time location on map
+                float lat = feedEntity.getVehicle().getPosition().getLatitude();
+                float lng = feedEntity.getVehicle().getPosition().getLongitude();
                 Marker marker = mMap.addMarker(new MarkerOptions()
-                        .position(bus.getPosition())
+                        .position(new LatLng(lat, lng))
                         .icon(busIcon));
                 mRealTimeBuses.add(marker);
+                //TODO: bearing
             }
         }
     }
@@ -154,7 +163,8 @@ public class MapPlotter {
         TimerTask mQueryBusLocationTask = new TimerTask() {
             @Override
             public void run() {
-                Call<RetrofitBusLocationInstance> call = service.getAllBusLocation();
+//                Call<RetrofitBusLocationInstance> call = service.getAllBusLocation();
+                Call<GtfsRealtimeProtos.FeedMessage> call = service.getAllBusLocationPb();
                 call.enqueue(mBusLocationCallback);
             }
         };
