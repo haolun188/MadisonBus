@@ -41,6 +41,10 @@ public class MapPlotter {
     private List<Polyline> mPolyLine;
     private BitmapDescriptor stopIcon;
     private BitmapDescriptor busIcon;
+    private BitmapDescriptor busUpIcon;
+    private BitmapDescriptor busDownIcon;
+    private BitmapDescriptor busLeftIcon;
+    private BitmapDescriptor busRightIcon;
     private BitmapDescriptor userIcon;
     private String busSelected;
     private Info mInfo;
@@ -66,6 +70,10 @@ public class MapPlotter {
     public void initialize(Context context) {
         stopIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_stop);
         busIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus);
+        busUpIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_up);
+        busDownIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_down);
+        busLeftIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_left);
+        busRightIcon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_right);
         userIcon = bitmapDescriptorFromVector(context, R.drawable.ic_dot);
 
         mBusLocationCallback = new Callback<GtfsRealtimeProtos.FeedMessage>() {
@@ -136,10 +144,25 @@ public class MapPlotter {
                 float lat = feedEntity.getVehicle().getPosition().getLatitude();
                 float lng = feedEntity.getVehicle().getPosition().getLongitude();
                 Marker marker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(lat, lng))
-                        .icon(busIcon));
+                        .position(new LatLng(lat, lng)));
+                switch ((int)feedEntity.getVehicle().getPosition().getBearing()) {
+                    case 0:
+                        marker.setIcon(busUpIcon);
+                        break;
+                    case 90:
+                        marker.setIcon(busRightIcon);
+                        break;
+                    case 180:
+                        marker.setIcon(busDownIcon);
+                        break;
+                    case 270:
+                        marker.setIcon(busLeftIcon);
+                        break;
+                    default:
+                        marker.setIcon(busIcon);
+                        Log.d(TAG, "angle:" + feedEntity.toString());
+                }
                 mRealTimeBuses.add(marker);
-                //TODO: bearing
             }
         }
     }
