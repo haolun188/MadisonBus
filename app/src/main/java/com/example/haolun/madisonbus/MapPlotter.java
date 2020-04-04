@@ -7,10 +7,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
-import com.example.haolun.madisonbus.buslocation.RetrofitBusInstance;
-import com.example.haolun.madisonbus.buslocation.RetrofitBusLocationClient;
-import com.example.haolun.madisonbus.buslocation.RetrofitBusLocationInstance;
-import com.example.haolun.madisonbus.buslocation.RetrofitBusLocationService;
+import com.example.haolun.madisonbus.retrofit.RetrofitBusInstance;
+import com.example.haolun.madisonbus.retrofit.RetrofitBusLocationClient;
+import com.example.haolun.madisonbus.retrofit.RetrofitBusLocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
