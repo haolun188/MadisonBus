@@ -44,6 +44,10 @@ public class MapPlotter {
     private BitmapDescriptor bus45Icon;
     private BitmapDescriptor bus90Icon;
     private BitmapDescriptor bus135Icon;
+    private BitmapDescriptor bus180Icon;
+    private BitmapDescriptor bus225Icon;
+    private BitmapDescriptor bus270Icon;
+    private BitmapDescriptor bus315Icon;
     private BitmapDescriptor userIcon;
     private String busSelected;
     private Info mInfo;
@@ -73,6 +77,10 @@ public class MapPlotter {
         bus45Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_45);
         bus90Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_90);
         bus135Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_135);
+        bus180Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_180);
+        bus225Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_225);
+        bus270Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_270);
+        bus315Icon = bitmapDescriptorFromVector(context, R.drawable.ic_bus_315);
         userIcon = bitmapDescriptorFromVector(context, R.drawable.ic_dot);
 
         mBusLocationCallback = new Callback<GtfsRealtimeProtos.FeedMessage>() {
@@ -148,14 +156,26 @@ public class MapPlotter {
                     case 0:
                         marker.setIcon(bus0Icon);
                         break;
+                    case 45:
+                        marker.setIcon(bus45Icon);
+                        break;
                     case 90:
                         marker.setIcon(bus90Icon);
+                        break;
+                    case 135:
+                        marker.setIcon(bus135Icon);
                         break;
                     case 180:
                         marker.setIcon(bus180Icon);
                         break;
+                    case 225:
+                        marker.setIcon(bus225Icon);
+                        break;
                     case 270:
                         marker.setIcon(bus270Icon);
+                        break;
+                    case 315:
+                        marker.setIcon(bus315Icon);
                         break;
                     default:
                         marker.setIcon(busIcon);
